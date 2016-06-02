@@ -14,12 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import java.io.IOException;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -66,25 +65,26 @@ public class MainActivity extends AppCompatActivity
 
     private void initData() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.example.com")
+                .baseUrl("http://apis.baidu.com/tngou/")//设置基本url地址
+                .addConverterFactory(GsonConverterFactory.create())//指定转换器-->json
                 .build();
         RetrofitApi retrofitApi = retrofit.create(RetrofitApi.class);
-        retrofitApi.createUser(null, new Callback<User>() {
+        Call<News> newsDetail = retrofitApi.getNewsDetail(6512);
+        //同步请求
+//        newsDetail.execute();//
+        //异步请求
+        newsDetail.enqueue(new Callback<News>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-
+            public void onResponse(Call<News> call, Response<News> response) {
+                System.out.println(response.body());
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
-
+            public void onFailure(Call<News> call, Throwable t) {
+                t.printStackTrace();
+                System.out.println("失败");
             }
         });
-        try {
-            User user = retrofitApi.exampleXml().execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -146,13 +146,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.imageView:
                 //第一个参数不能为空-->表示依托的父容器
-                Snackbar.make(v,"侧滑菜单头的图片",Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(v, "侧滑菜单头的图片", Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.textView:
-                Snackbar.make(v,"侧滑菜单头的文本",Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(v, "侧滑菜单头的文本", Snackbar.LENGTH_SHORT).show();
                 break;
         }
     }
